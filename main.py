@@ -99,7 +99,7 @@ class Game:
         self.aliens.update(self.alien_direction)    #Alien movement
         self.alien_position_checker()   #Alien positions
         self.alien_lasers.update()  #Updates the alien lasers
-        self.extra_alien_timmer()
+        self.extra_alien_timmer()   #Extra alien timer
         self.extra.update()
 
         self.player.sprite.lasers.draw(screen)      #Draws the player lasers
