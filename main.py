@@ -3,8 +3,11 @@ from player import Player
 import obstacle
 
 
-from alien import Alien
-from random import choice
+from alien import Alien, Extra
+from random import choice, randint
+from laser import Laser
+
+
 
 class Game:
     def __init__(self):
@@ -22,10 +25,15 @@ class Game:
 
         #alien setup
         self.aliens = pygame.sprite.Group()
+        self.alien_lasers = pygame.sprite.Group()
         self.alien_setup(rows = 6, cols = 8)
         self.alien_direction = 1
+      
 
 
+        #extra setup
+        self.extra = pygame.sprite.GroupSingle()
+        self.extra_spawn_time = randint(40,80) 
 
 
     def create_obstacle(self, x_start, y_start,offset_x):
@@ -73,19 +81,35 @@ class Game:
     def alien_shoot(self):
         if self.aliens.sprites():
             random_alien = choice(self.aliens.sprites())
-            
+            laser_sprite = Laser(random_alien.rect.center,6,screen_height)
+            self.alien_lasers.add(laser_sprite)
+
+
+    def extra_alien_timmer(self):
+        self.extra_spawn_time -= 1
+        if self.extra_spawn_time <= 0:
+            self.extra.add(Extra(choice(['right','left']),screen_width))
+            self.extra_spawn_time = randint(400,800)
 
 
 
-    def run(self):
-        self.player.update()
-        self.aliens.update(self.alien_direction)
 
-        self.player.sprite.lasers.draw(screen)
-        self.player.draw(screen)
+    def run(self):  #Game loop
+        self.player.update()    #Player movement
+        self.aliens.update(self.alien_direction)    #Alien movement
+        self.alien_position_checker()   #Alien positions
+        self.alien_lasers.update()  #Updates the alien lasers
+        self.extra_alien_timmer()
+        self.extra.update()
 
-        self.blocks.draw(screen)
-        self.aliens.draw(screen)
+        self.player.sprite.lasers.draw(screen)      #Draws the player lasers
+        self.player.draw(screen)    #Draws the player
+
+        self.blocks.draw(screen)     #Draws the obstacles
+        self.aliens.draw(screen)      #Draws the aliens
+        self.alien_lasers.draw(screen)  #Draws the alien lasers
+        self.extra.draw(screen)
+
 
 pygame.init()
 screen_width = 800  
@@ -93,11 +117,19 @@ screen_height = 800
 screen = pygame.display.set_mode((screen_width,screen_height))
 clock = pygame.time.Clock()
 game = Game()
+
+ALIENLASER = pygame.USEREVENT + 1
+pygame.time.set_timer(ALIENLASER,1000) #Sets the timer for the alien laser
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == ALIENLASER:
+            game.alien_shoot()
+
+
     screen.fill((10,10,10)) 
     game.run()
     pygame.display.flip()
