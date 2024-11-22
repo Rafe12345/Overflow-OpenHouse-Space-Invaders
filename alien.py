@@ -7,4 +7,5 @@ class Alien(pygame.sprite.Sprite):
         self.image = pygame.image.load(file_path).convert_alpha()
         self.image = self.image.get_rect(topleft = (x,y))
     
-
+def update(self,direction):
+    self.rect.x += direction
