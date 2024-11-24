@@ -101,6 +101,38 @@ class Game:
                 if pygame.sprite.spritecollide(laser,self.blocks,True):
                     laser.kill()
 
+                #alien collisions
+                if pygame.sprite.spritecollide(laser,self.aliens,True):
+                    laser.kill()
+
+                #extra alien collision
+                if pygame.sprite.spritecollide(laser,self.extra,True):
+                    laser.kill()
+
+        #alien laser
+        if self.alien_lasers:
+            for laser in self.alien_lasers:
+                if pygame.sprite.spritecollide(laser,self.blocks,True):
+                    laser.kill()
+
+                if pygame.sprite.spritecollide(laser,self.player,False):
+                    laser.kill()
+                    print('player hit')
+
+        #aliens
+        if self.aliens:
+            for alien in self.aliens:
+                pygame.sprite.spritecollide(alien,self.blocks,True)
+                    
+                if pygame.sprite.spritecollide(alien,self.player,False):
+                    pygame.quit()   #Quits the game
+                    sys.exit()      #Exits the game
+
+
+
+
+
+
 
     def run(self):  #Game loop
         self.player.update()    #Player movement
