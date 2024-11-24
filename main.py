@@ -178,6 +178,28 @@ class Game:
         self.display_score()        #Displays the score
 
 
+class CRT:  #CRT class
+    def __init__(self): #Loads the tv image
+        self.tv = pygame.image.load('../graphics/tv.png').convert_alpha()
+        self.tv = pygame.transform.scale(self.tv,screen_width,screen_height)
+
+    def create_crt_lines(self): #Creates the crt lines
+        line_height = 3
+        line_amount = (screen_height / line_height)
+        for line in range(line_amount):
+            y_pos = line * line_height
+            pygame.draw.line(self.tv,'black',(0,y_pos),(screen_width,y_pos),1)
+
+    def draw(self):    #Draws the tv
+        self.tv.set_alpha(randint(75,90))   #Sets the alpha of the tv
+        self.create_crt_lines()    #Creates the crt lines
+        screen.blit(self.tv,(0,0))  #Draws the tv
+
+    
+
+
+
+
 
 
 
@@ -187,6 +209,7 @@ screen_height = 800
 screen = pygame.display.set_mode((screen_width,screen_height))
 clock = pygame.time.Clock()
 game = Game()
+crt = CRT()
 
 ALIENLASER = pygame.USEREVENT + 1
 pygame.time.set_timer(ALIENLASER,1000) #Sets the timer for the alien laser
@@ -202,6 +225,10 @@ while True:
 
     screen.fill((10,10,10)) 
     game.run()
+    crt.draw()
+
+
+
     pygame.display.flip()
     clock.tick(60) #Sets the fps to be 60
 
