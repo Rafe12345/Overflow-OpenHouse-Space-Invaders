@@ -10,6 +10,7 @@ class Player(pygame.sprite.Sprite):
         self.laserCoolDown = 300
         self.lastshottime = 0 
         self.lasers = pygame.sprite.Group()
+
     def getinput(self): #Where the CV will take over instead of listening to keybinds it listens to the cv output
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]: #Movement for the player sprite (RIGHT)
@@ -22,8 +23,10 @@ class Player(pygame.sprite.Sprite):
             if self.current_time - self.lastshottime >= self.laserCoolDown: #Cool down timer for laser
                 self.shootlaser()
                 self.lastshottime = self.current_time
+
     def shootlaser(self):
         self.lasers.add(Laser(self.rect.center,-6,self.rect.bottom)) #Creates laser objects and adding it into the sprite group
+        
     def update(self):
         self.current_time = pygame.time.get_ticks()
         self.lasers.update()
