@@ -6,13 +6,14 @@ import obstacle
 from alien import Alien, Extra
 from random import choice, randint
 from laser import Laser
+from hand_detection import hand_status # Ensures hand detetion runs in the background
 
 
 
 class Game:
     def __init__(self):
         #player setup
-        player_sprite = Player((screen_width/2,screen_height-20))
+        player_sprite = Player((screen_width/2,screen_height-20), screen_width, screen_height)
         self.player = pygame.sprite.GroupSingle(player_sprite)
 
         # health and score setup   
@@ -231,7 +232,7 @@ while True:
     if not game.paused:
         screen.fill((10, 10, 10))  # Clear screen only when running
         crt.draw()
-
+    game.player.sprite.update()
     game.run()
     pygame.display.flip()
     clock.tick(60) #Sets the fps to be 60
