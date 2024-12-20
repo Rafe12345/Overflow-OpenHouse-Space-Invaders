@@ -1,6 +1,8 @@
 # Overflow-OpenHouse-Space-Invaders
 To get started open cmd and type
 > pip install pygame or pip3 install pygame
+
+> pip install opencv-python mediapipe
 ## Credits
 Tutorial / Reference
 > https://youtu.be/o-6pADy5Mdg?si=JmT8Mas7DxUO7sdf
