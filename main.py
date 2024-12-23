@@ -12,7 +12,7 @@ class Game:
         #player setup
         player_sprite = Player((screen_width/2,screen_height-20), screen_width, screen_height)
         self.player = pygame.sprite.GroupSingle(player_sprite)
-
+        self.menu = True
         # health and score setup   
         self.lives = 3
         self.live_surf = pygame.image.load('resources/player_sprite.png').convert_alpha()
@@ -132,9 +132,9 @@ class Game:
                         hit_rect = hit_msg.get_rect(center = (screen_width/2,screen_height/2))
                         screen.blit(hit_msg,hit_rect)
                         pygame.display.flip()
-                        pygame.time.delay(2000)
-                        pygame.quit()
-                        sys.exit()
+                        pygame.time.delay(1000)
+                        pygame.time.set_timer(ALIENLASER, 0)
+                        self.menu = True
                     else:
                         hit_msg = self.font.render(f'Damage! {self.lives} lives remaining',False,'red')
                         hit_rect = hit_msg.get_rect(center = (screen_width/2,60))
@@ -215,8 +215,7 @@ clock = pygame.time.Clock()
 game = Game()
 crt = CRT()
 
-ALIENLASER = pygame.USEREVENT + 1
-pygame.time.set_timer(ALIENLASER,500) #Sets the timer for the alien laser
+ALIENLASER = pygame.USEREVENT + 1 #Sets the timer for the alien laser
 
 while True:
     for event in pygame.event.get():
@@ -225,11 +224,28 @@ while True:
             sys.exit()
         if event.type == ALIENLASER:
             game.alien_shoot()
-    if not game.paused:
-        screen.fill((10, 10, 10))  # Clear screen only when running
-        crt.draw()
-    game.player.sprite.update()
-    game.run()
+    if game.menu:
+        bg = pygame.image.load('./resources/Moon Retro Aesthetic.jpg')
+        bg = bg.convert_alpha()
+        bg = pygame.transform.scale(bg, (screen_width, screen_height))
+        bg_rect = bg.get_rect()
+        screen.fill((60, 25, 60))  # Clear screen only when running
+        screen.blit(bg, bg_rect)
+        text = game.font.render('Start' , True , 'black')
+        btn = pygame.draw.rect(screen, (171, 54, 214),[ (screen_width - 210) // 2, (screen_height - 50) // 2,210,50],border_radius=14)
+        text_rect = text.get_rect(center=(screen_width // 2, screen_height // 2))
+        screen.blit(text , text_rect)
+        mouse_pos = pygame.mouse.get_pos()
+        if event.type == pygame.MOUSEBUTTONDOWN and btn.collidepoint(mouse_pos):
+            pygame.time.set_timer(ALIENLASER,500)
+            game.run()
+            game.menu = False
+    else:
+        if not game.paused:
+            screen.fill((10, 10, 10))  # Clear screen only when running
+            crt.draw()
+        game.player.sprite.update()
+        game.run()
     pygame.display.flip()
     clock.tick(60) #Sets the fps to be 60
 
