@@ -168,11 +168,9 @@ class Game:
             if pygame.time.get_ticks() - self.pause_time > 500:
                 self.paused = False
             return
-        
         self.player.update()    #Player movement #Where the CV will take over instead of listening to keybinds it listens to the cv output
         self.alien_lasers.update()  #Updates the alien lasers
         self.extra.update()
-
         self.aliens.update(self.alien_direction)    #Alien movement
         self.alien_position_checker()   #Alien positions
         self.extra_alien_timmer()   #Extra alien timer
@@ -238,6 +236,7 @@ while True:
         mouse_pos = pygame.mouse.get_pos()
         if event.type == pygame.MOUSEBUTTONDOWN and btn.collidepoint(mouse_pos):
             pygame.time.set_timer(ALIENLASER,500)
+            game = Game()
             game.run()
             game.menu = False
     else:
