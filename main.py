@@ -1,13 +1,10 @@
 import pygame, sys
 from player import Player
 import obstacle
-
-
 from alien import Alien, Extra
 from random import choice, randint
 from laser import Laser
 from hand_detection import hand_status # Ensures hand detetion runs in the background
-
 
 
 class Game:
@@ -37,9 +34,9 @@ class Game:
         self.aliens = pygame.sprite.Group()
         self.alien_lasers = pygame.sprite.Group()
         self.alien_setup(rows = 6, cols = 8)
-        self.alien_direction = 1
+        self.alien_direction = 0.8
         self.paused = False
-        self.pause_time = 1500
+        self.pause_time = 1000
 
         #extra setup
         self.extra = pygame.sprite.GroupSingle()
@@ -70,14 +67,14 @@ class Game:
                 self.aliens.add(alien_sprite)
 
 
-    def alien_position_checker(self):       #Alien positions#alien positions
+    def alien_position_checker(self):       #Alien positions
         all_aliens = self.aliens.sprites()
         for alien in all_aliens:
             if alien.rect.right >= screen_width:
-                self.alien_direction = -1
+                self.alien_direction = -0.8
                 self.alien_move_down(2)
             elif alien.rect.left <= 0:
-                self.alien_direction = 1
+                self.alien_direction = 0.8
                 self.alien_move_down(2)
 
 
@@ -89,7 +86,7 @@ class Game:
     def alien_shoot(self):
         if self.aliens.sprites():
             random_alien = choice(self.aliens.sprites())
-            laser_sprite = Laser(random_alien.rect.center, 6, screen_height)
+            laser_sprite = Laser(random_alien.rect.center, 6, screen_height,"red")
             self.alien_lasers.add(laser_sprite)
 
 
@@ -228,7 +225,6 @@ while True:
             sys.exit()
         if event.type == ALIENLASER:
             game.alien_shoot()
-
     if not game.paused:
         screen.fill((10, 10, 10))  # Clear screen only when running
         crt.draw()
@@ -236,14 +232,6 @@ while True:
     game.run()
     pygame.display.flip()
     clock.tick(60) #Sets the fps to be 60
-
-
-
-
-
-
-
-
 
 
 

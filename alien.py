@@ -21,10 +21,10 @@ class Extra(pygame.sprite.Sprite): #Bonus alien consturctor
 		
 		if side == 'right':
 			x = screen_width + 50
-			self.speed = - 3
+			self.speed = - 2
 		else:
 			x = -50
-			self.speed = 3
+			self.speed = 2
 
 		self.rect = self.image.get_rect(topleft = (x,80))
 

@@ -7,7 +7,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load('./resources/player_sprite.png').convert_alpha()
         self.image = pygame.transform.scale(self.image,(75, 75)) #Sets the size of the player to be 75 by 75
         self.rect = self.image.get_rect(midbottom = pos) #initial position of the player
-        self.speed = 10
+        self.speed = 2
         self.laserCoolDown = 500
         self.lastshottime = 0 
         self.lasers = pygame.sprite.Group()
@@ -29,7 +29,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = self.screen_width
 
     def shootlaser(self):
-        self.lasers.add(Laser(self.rect.center,-6,self.rect.bottom)) #Creates laser objects and adding it into the sprite group
+        self.lasers.add(Laser(self.rect.center,-6,self.rect.bottom,"green")) #Creates laser objects and adding it into the sprite group
         
     def automatic_shoot(self):  # Automatically shoot laser every 2 seconds
         if self.current_time - self.lastshottime >= self.laserCoolDown:

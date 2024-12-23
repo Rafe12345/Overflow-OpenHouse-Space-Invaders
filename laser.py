@@ -1,10 +1,10 @@
 import pygame 
 
 class Laser(pygame.sprite.Sprite):
-	def __init__(self,pos,speed,screen_height):
+	def __init__(self,pos,speed,screen_height,color):
 		super().__init__()
 		self.image = pygame.Surface((5,20)) #Sets the size of the laser beam
-		self.image.fill('red') #Colour of laser beam
+		self.image.fill(color) #Colour of laser beam
 		self.rect = self.image.get_rect(center = pos)
 		self.speed = speed
 		self.height_y_constraint = screen_height
