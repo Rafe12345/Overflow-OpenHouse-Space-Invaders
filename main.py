@@ -148,9 +148,13 @@ class Game:
                 pygame.sprite.spritecollide(alien,self.blocks,True)
                     
                 if pygame.sprite.spritecollide(alien,self.player,False):
-                    pygame.quit()   #Quits the game
-                    sys.exit()      #Exits the game
-
+                    hit_msg = self.font.render(f'Game Over! Final Score: {self.score}',False,'red') #Game over msgs
+                    hit_rect = hit_msg.get_rect(center = (screen_width/2,screen_height/2))
+                    screen.blit(hit_msg,hit_rect)
+                    pygame.display.flip()
+                    pygame.time.delay(1000)
+                    pygame.time.set_timer(ALIENLASER, 0)
+                    self.menu = True
 
     def display_lives(self):
         for live in range(self.lives):
@@ -161,7 +165,9 @@ class Game:
         score_surf = self.font.render(f'Score: {self.score}',False,'white')
         score_rect = score_surf.get_rect(topleft = (10,-10))
         screen.blit(score_surf,score_rect)
-
+    def alienclear(self):
+        if not self.aliens.sprites():
+            self.alien_setup(rows = 6, cols = 8)
 
     def run(self):  #Game loop
         if self.paused:
@@ -185,6 +191,7 @@ class Game:
         self.extra.draw(screen)
         self.display_lives()        #Displays the lives
         self.display_score()        #Displays the score
+        self.alienclear()
 
 
 class CRT:  #CRT class
@@ -193,7 +200,7 @@ class CRT:  #CRT class
         self.tv = pygame.transform.scale(self.tv,(screen_width,screen_height))
 
     def create_crt_lines(self): #Creates the crt lines
-        line_height = 3
+        line_height = 6
         line_amount = int((screen_height / line_height))
         for line in range(line_amount):
             y_pos = line * line_height
@@ -204,7 +211,44 @@ class CRT:  #CRT class
         self.create_crt_lines()    #Creates the crt lines
         screen.blit(self.tv,(0,0))  #Draws the tv
 
-    
+class menu: #Aliens for the game menu not for the game itself
+    def __init__(self):
+        self.aliens = pygame.sprite.Group()
+        self.alien_setup(rows = 6, cols = 8)
+        self.alien_direction = 0.9
+        self.alien_lasers = pygame.sprite.Group()
+        self.lastshottime = 0 
+    def alien_setup(self,rows,cols,x_distance = 60,y_distance = 48,x_offset = 70, y_offset = 220):  #Alien positions (offset so that it away from the top and side of the)
+        for row_index, row in enumerate(range(rows)):
+            for col_index, col in enumerate(range(cols)):
+                x = col_index * x_distance + x_offset
+                y = row_index * y_distance + y_offset
+                if row_index == 0: alien_sprite = Alien('red',x,y)          #Alien colors
+                elif 1 <= row_index <= 2: alien_sprite = Alien('green',x,y) #Alien colors
+                else: alien_sprite = Alien('yellow',x,y)                    #Alien colors
+                self.aliens.add(alien_sprite)
+    def alien_position_checker(self):       #Alien positions
+        all_aliens = self.aliens.sprites()
+        for alien in all_aliens:
+            if alien.rect.right >= screen_width:
+                self.alien_direction = -0.9
+            elif alien.rect.left <= 0:
+                self.alien_direction = 0.9
+    def alien_shoot(self):
+        if self.aliens.sprites():
+            random_alien = choice(self.aliens.sprites())
+            laser_sprite = Laser(random_alien.rect.center, 6, screen_height,"red")
+            self.alien_lasers.add(laser_sprite)
+            self.lastshottime = pygame.time.get_ticks()
+    def run(self):
+        self.current_time = pygame.time.get_ticks()
+        if self.current_time - self.lastshottime >= 300:
+            self.alien_shoot()
+        self.aliens.update(self.alien_direction)
+        self.alien_position_checker()
+        self.alien_lasers.update()
+        self.aliens.draw(screen)
+        self.alien_lasers.draw(screen)
 pygame.init()
 screen_width = 800  
 screen_height = 800
@@ -212,7 +256,7 @@ screen = pygame.display.set_mode((screen_width,screen_height))
 clock = pygame.time.Clock()
 game = Game()
 crt = CRT()
-
+menualien = menu()
 ALIENLASER = pygame.USEREVENT + 1 #Sets the timer for the alien laser
 
 while True:
@@ -222,17 +266,25 @@ while True:
             sys.exit()
         if event.type == ALIENLASER:
             game.alien_shoot()
-    if game.menu:
-        bg = pygame.image.load('./resources/Moon Retro Aesthetic.jpg')
+    if game.menu: #Game Menu
+        bg = pygame.image.load('./resources/background.png')
         bg = bg.convert_alpha()
         bg = pygame.transform.scale(bg, (screen_width, screen_height))
+        logo = pygame.image.load('./resources/logo.png')
+        logo = logo.convert_alpha()
+        logo_rect = logo.get_rect(center=(screen_width // 2, 150))
         bg_rect = bg.get_rect()
-        screen.fill((60, 25, 60))  # Clear screen only when running
         screen.blit(bg, bg_rect)
+        screen.blit(logo, logo_rect)
         text = game.font.render('Start' , True , 'black')
-        btn = pygame.draw.rect(screen, (171, 54, 214),[ (screen_width - 210) // 2, (screen_height - 50) // 2,210,50],border_radius=14)
-        text_rect = text.get_rect(center=(screen_width // 2, screen_height // 2))
+        highscore = game.font.render(f"High Score: {game.score}", True, 'black')
+        btn = pygame.draw.rect(screen, (171, 54, 214),[ (screen_width - 260) // 2, 550,260,50],border_radius=14)
+        highscorebg = pygame.draw.rect(screen, (171, 54, 214),[ (screen_width - 300) // 2, 650,300,50],border_radius=14)
+        text_rect = text.get_rect(center=(screen_width // 2, 575))
+        highscore_rect = highscore.get_rect(center=(screen_width // 2, 675))
+        screen.blit(highscore, highscore_rect)
         screen.blit(text , text_rect)
+        menualien.run()
         mouse_pos = pygame.mouse.get_pos()
         if event.type == pygame.MOUSEBUTTONDOWN and btn.collidepoint(mouse_pos):
             pygame.time.set_timer(ALIENLASER,500)
@@ -241,7 +293,7 @@ while True:
             game.menu = False
     else:
         if not game.paused:
-            screen.fill((10, 10, 10))  # Clear screen only when running
+            screen.blit(bg, bg_rect)
             crt.draw()
         game.player.sprite.update()
         game.run()
