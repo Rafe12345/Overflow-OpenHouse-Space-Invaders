@@ -148,9 +148,13 @@ class Game:
                 pygame.sprite.spritecollide(alien,self.blocks,True)
                     
                 if pygame.sprite.spritecollide(alien,self.player,False):
-                    pygame.quit()   #Quits the game
-                    sys.exit()      #Exits the game
-
+                    hit_msg = self.font.render(f'Game Over! Final Score: {self.score}',False,'red') #Game over msgs
+                    hit_rect = hit_msg.get_rect(center = (screen_width/2,screen_height/2))
+                    screen.blit(hit_msg,hit_rect)
+                    pygame.display.flip()
+                    pygame.time.delay(1000)
+                    pygame.time.set_timer(ALIENLASER, 0)
+                    self.menu = True
 
     def display_lives(self):
         for live in range(self.lives):
@@ -161,7 +165,12 @@ class Game:
         score_surf = self.font.render(f'Score: {self.score}',False,'white')
         score_rect = score_surf.get_rect(topleft = (10,-10))
         screen.blit(score_surf,score_rect)
-
+    def victory_message(self):
+        if not self.aliens.sprites():
+            self.alien_setup()
+        #     win = self.font.render(f"You won, score is {self.score}", False, 'white')
+        #     win_rect = win.get_rect(center=(screen_width // 2, screen_height // 2))
+        #     screen.blit(win, win_rect)
 
     def run(self):  #Game loop
         if self.paused:
@@ -185,6 +194,7 @@ class Game:
         self.extra.draw(screen)
         self.display_lives()        #Displays the lives
         self.display_score()        #Displays the score
+        self.victory_message()
 
 
 class CRT:  #CRT class
@@ -223,14 +233,18 @@ while True:
         if event.type == ALIENLASER:
             game.alien_shoot()
     if game.menu:
-        bg = pygame.image.load('./resources/Moon Retro Aesthetic.jpg')
+        bg = pygame.image.load('./resources/background.png')
         bg = bg.convert_alpha()
         bg = pygame.transform.scale(bg, (screen_width, screen_height))
+        logo = pygame.image.load('./resources/logo.png')
+        logo = logo.convert_alpha()
+        logo_rect = logo.get_rect(center=(screen_width // 2, screen_height // 2 - 100))
         bg_rect = bg.get_rect()
         screen.fill((60, 25, 60))  # Clear screen only when running
         screen.blit(bg, bg_rect)
+        screen.blit(logo, logo_rect)
         text = game.font.render('Start' , True , 'black')
-        btn = pygame.draw.rect(screen, (171, 54, 214),[ (screen_width - 210) // 2, (screen_height - 50) // 2,210,50],border_radius=14)
+        btn = pygame.draw.rect(screen, (171, 54, 214),[ (screen_width - 260) // 2, (screen_height - 50) // 2,260,50],border_radius=14)
         text_rect = text.get_rect(center=(screen_width // 2, screen_height // 2))
         screen.blit(text , text_rect)
         mouse_pos = pygame.mouse.get_pos()
@@ -242,6 +256,7 @@ while True:
     else:
         if not game.paused:
             screen.fill((10, 10, 10))  # Clear screen only when running
+            screen.blit(bg, bg_rect)
             crt.draw()
         game.player.sprite.update()
         game.run()
