@@ -165,12 +165,9 @@ class Game:
         score_surf = self.font.render(f'Score: {self.score}',False,'white')
         score_rect = score_surf.get_rect(topleft = (10,-10))
         screen.blit(score_surf,score_rect)
-    def victory_message(self):
+    def alienclear(self):
         if not self.aliens.sprites():
-            self.alien_setup()
-        #     win = self.font.render(f"You won, score is {self.score}", False, 'white')
-        #     win_rect = win.get_rect(center=(screen_width // 2, screen_height // 2))
-        #     screen.blit(win, win_rect)
+            self.alien_setup(rows = 6, cols = 8)
 
     def run(self):  #Game loop
         if self.paused:
@@ -194,7 +191,7 @@ class Game:
         self.extra.draw(screen)
         self.display_lives()        #Displays the lives
         self.display_score()        #Displays the score
-        self.victory_message()
+        self.alienclear()
 
 
 class CRT:  #CRT class
@@ -244,8 +241,12 @@ while True:
         screen.blit(bg, bg_rect)
         screen.blit(logo, logo_rect)
         text = game.font.render('Start' , True , 'black')
+        highscore = game.font.render(f"High Score: {game.score}", True, 'black')
         btn = pygame.draw.rect(screen, (171, 54, 214),[ (screen_width - 260) // 2, (screen_height - 50) // 2,260,50],border_radius=14)
+        highscorebg = pygame.draw.rect(screen, (171, 54, 214),[ (screen_width - 300) // 2, (screen_height - 50) // 2 + 100,300,50],border_radius=14)
         text_rect = text.get_rect(center=(screen_width // 2, screen_height // 2))
+        highscore_rect = highscore.get_rect(center=(screen_width // 2, screen_height // 2 + 100))
+        screen.blit(highscore, highscore_rect)
         screen.blit(text , text_rect)
         mouse_pos = pygame.mouse.get_pos()
         if event.type == pygame.MOUSEBUTTONDOWN and btn.collidepoint(mouse_pos):
