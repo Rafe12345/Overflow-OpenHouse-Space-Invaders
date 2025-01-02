@@ -20,7 +20,7 @@ class Game:
         self.live_x_start_pos = screen_width - (self.live_surf.get_size()[0] * 2 + 20)
         self.score = 0
         self.font = pygame.font.Font('resources/Koulen-Regular.ttf', 40)
-
+        self.explosion_group = pygame.sprite.Group()
 
         #obstacle setup
         self.shape = obstacle.shape
@@ -107,13 +107,19 @@ class Game:
                 #alien collisions
                 aliens_hit = pygame.sprite.spritecollide(laser,self.aliens,True)
                 if aliens_hit:
-                    for alien in aliens_hit:    
+                    for alien in aliens_hit:
+                        pos = alien.rect.center
+                        explosion = Explosion(pos[0],pos[1])
+                        self.explosion_group.add(explosion)      
                         self.score += alien.value
                     laser.kill()
                         
 
                 #extra alien collision
                 if pygame.sprite.spritecollide(laser,self.extra,True):
+                    pos = self.extra.rect.center
+                    explosion = Explosion(pos[0],pos[1])
+                    self.explosion_group.add(explosion) 
                     self.score += 500
                     laser.kill()
                     
@@ -123,16 +129,18 @@ class Game:
             for laser in self.alien_lasers:
                 if pygame.sprite.spritecollide(laser,self.blocks,True):
                     laser.kill()
-
                 if pygame.sprite.spritecollide(laser,self.player,False):
                     laser.kill()
+                    pos = self.player.sprite.rect.top
+                    explosion = Explosion(self.player.sprite.rect.center[0],pos)
+                    self.explosion_group.add(explosion) 
                     self.lives -= 1
                     if self.lives <= 0:
                         hit_msg = self.font.render(f'Game Over! Final Score: {self.score}',False,'red') #Game over msgs
                         hit_rect = hit_msg.get_rect(center = (screen_width/2,screen_height/2))
                         screen.blit(hit_msg,hit_rect)
                         pygame.display.flip()
-                        pygame.time.delay(1000)
+                        pygame.time.delay(1100)
                         pygame.time.set_timer(ALIENLASER, 0)
                         self.menu = True
                     else:
@@ -170,6 +178,8 @@ class Game:
             self.alien_setup(rows = 6, cols = 8)
 
     def run(self):  #Game loop
+        self.explosion_group.draw(screen)
+        self.explosion_group.update()
         if self.paused:
             if pygame.time.get_ticks() - self.pause_time > 500:
                 self.paused = False
@@ -182,7 +192,6 @@ class Game:
         self.extra_alien_timmer()   #Extra alien timer
         self.collision_check()      #Collision check
         
-
         self.player.sprite.lasers.draw(screen)      #Draws the player lasers
         self.player.draw(screen)    #Draws the player
         self.blocks.draw(screen)     #Draws the obstacles
@@ -210,6 +219,34 @@ class CRT:  #CRT class
         self.tv.set_alpha(randint(75,90))   #Sets the alpha of the tv
         self.create_crt_lines()    #Creates the crt lines
         screen.blit(self.tv,(0,0))  #Draws the tv
+
+class Explosion(pygame.sprite.Sprite): #Explosion code from Russcode
+	def __init__(self, x, y):
+		pygame.sprite.Sprite.__init__(self)
+		self.images = []
+		for num in range(1, 6):
+			img = pygame.image.load(f"./resources/explosion/exp{num}.png")
+			img = pygame.transform.scale(img, (100, 100))
+			self.images.append(img)
+		self.index = 0
+		self.image = self.images[self.index]
+		self.rect = self.image.get_rect()
+		self.rect.center = [x, y]
+		self.counter = 0
+
+	def update(self):
+		explosion_speed = 4
+		#update explosion animation
+		self.counter += 1
+
+		if self.counter >= explosion_speed and self.index < len(self.images) - 1:
+			self.counter = 0
+			self.index += 1
+			self.image = self.images[self.index]
+
+		#if the animation is complete, reset animation index
+		if self.index >= len(self.images) - 1 and self.counter >= explosion_speed:
+			self.kill()
 
 class menu: #Aliens for the game menu not for the game itself
     def __init__(self):
@@ -258,7 +295,6 @@ game = Game()
 crt = CRT()
 menualien = menu()
 ALIENLASER = pygame.USEREVENT + 1 #Sets the timer for the alien laser
-
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
