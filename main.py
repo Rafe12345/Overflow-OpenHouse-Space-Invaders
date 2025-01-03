@@ -43,13 +43,13 @@ class Game:
         self.extra_spawn_time = randint(40,80) 
 
 	# Audio
-	music = pygame.mixer.Sound('audio/music.wav')
-	music.set_volume(0.2)
-	music.play(loops = -1)
-	self.laser_sound = pygame.mixer.Sound('audio/audio_laser.wav')
-	self.laser_sound.set_volume(0.5)
-	self.explosion_sound = pygame.mixer.Sound('audio/audio_explosion.wav')
-	self.explosion_sound.set_volume(0.3)
+        music = pygame.mixer.Sound('audio/music.wav')
+        music.set_volume(0.2)
+        music.play(loops = -1)
+        self.laser_sound = pygame.mixer.Sound('audio/audio_laser.wav')
+        self.laser_sound.set_volume(0.5)
+        self.explosion_sound = pygame.mixer.Sound('audio/audio_explosion.wav')
+        self.explosion_sound.set_volume(0.3)
 	
 
 
@@ -98,7 +98,7 @@ class Game:
             random_alien = choice(self.aliens.sprites())
             laser_sprite = Laser(random_alien.rect.center, 6, screen_height,"red")
             self.alien_lasers.add(laser_sprite)
-	    self.laser_sound.play()
+            self.laser_sound.play()
 
 
     def extra_alien_timmer(self):
@@ -124,15 +124,16 @@ class Game:
                         self.explosion_group.add(explosion)      
                         self.score += alien.value
                     laser.kill()
-		    self.explosion_sound.play()
+                    self.explosion_sound.play()
                         
 
                 #extra alien collision
-                if pygame.sprite.spritecollide(laser,self.extra,True):
-                    pos = self.extra.rect.center
+                if pygame.sprite.spritecollide(laser,self.extra,False):
+                    pos = self.extra.sprite.rect.center
                     explosion = Explosion(pos[0],pos[1])
                     self.explosion_group.add(explosion) 
                     self.score += 500
+                    self.extra.sprite.kill()
                     laser.kill()
                     
 
