@@ -16,8 +16,9 @@ class Game:
         # health and score setup   
         self.lives = 3
         self.live_surf = pygame.image.load('resources/player_sprite.png').convert_alpha()
-        self.live_surf = pygame.transform.scale(self.live_surf,(75, 75))
-        self.live_x_start_pos = screen_width - (self.live_surf.get_size()[0] * 2 + 20)
+        self.live_surf = pygame.transform.scale(self.live_surf,(50, 50))
+        self.live_x_start_pos = screen_width - 10
+        self.live_surf_rect = self.live_surf.get_rect(topright = (self.live_x_start_pos,8))
         self.score = 0
         self.font = pygame.font.Font('resources/Koulen-Regular.ttf', 40)
         self.explosion_group = pygame.sprite.Group()
@@ -41,7 +42,8 @@ class Game:
         #extra setup
         self.extra = pygame.sprite.GroupSingle()
         self.extra_spawn_time = randint(40,80) 
-
+        self.powerupsgroup = pygame.sprite.Group()
+        self.tripleshoot = pygame.sprite.Group()
 	# Audio
         music = pygame.mixer.Sound('audio/music.wav')
         music.set_volume(0.2)
@@ -49,7 +51,7 @@ class Game:
         self.laser_sound = pygame.mixer.Sound('audio/audio_laser.wav')
         self.laser_sound.set_volume(0.5)
         self.explosion_sound = pygame.mixer.Sound('audio/audio_explosion.wav')
-        self.explosion_sound.set_volume(0.3)
+        self.explosion_sound.set_volume(0.5)
 	
 
 
@@ -98,7 +100,7 @@ class Game:
             random_alien = choice(self.aliens.sprites())
             laser_sprite = Laser(random_alien.rect.center, 6, screen_height,"red")
             self.alien_lasers.add(laser_sprite)
-            self.laser_sound.play()
+            # self.laser_sound.play()
 
 
     def extra_alien_timmer(self):
@@ -120,6 +122,11 @@ class Game:
                 if aliens_hit:
                     for alien in aliens_hit:
                         pos = alien.rect.center
+                        num = randint(1,10)
+                        if num == 1:
+                            self.powerupsgroup.add(Powerups(pos))
+                        elif num == 2:
+                            self.tripleshoot.add(tripleshoot(pos))
                         explosion = Explosion(pos[0],pos[1])
                         self.explosion_group.add(explosion)      
                         self.score += alien.value
@@ -150,7 +157,7 @@ class Game:
                     self.lives -= 1
                     if self.lives <= 0:
                         hit_msg = self.font.render(f'Game Over! Final Score: {self.score}',False,'red') #Game over msgs
-                        hit_rect = hit_msg.get_rect(center = (screen_width/2,screen_height/2))
+                        hit_rect = hit_msg.get_rect(center = (screen_width//2,screen_height//2))
                         screen.blit(hit_msg,hit_rect)
                         pygame.display.flip()
                         pygame.time.delay(1100)
@@ -158,7 +165,7 @@ class Game:
                         self.menu = True
                     else:
                         hit_msg = self.font.render(f'Damage! {self.lives} lives remaining',False,'red')
-                        hit_rect = hit_msg.get_rect(center = (screen_width/2,60))
+                        hit_rect = hit_msg.get_rect(center = (screen_width//2,60))
                         screen.blit(hit_msg,hit_rect)
                         self.paused = True
                         self.pause_time = pygame.time.get_ticks()
@@ -176,20 +183,37 @@ class Game:
                     pygame.time.delay(1000)
                     pygame.time.set_timer(ALIENLASER, 0)
                     self.menu = True
+        #powerups
+        if self.powerupsgroup:
+            for powerup in self.powerupsgroup:
+                if pygame.sprite.spritecollide(powerup,self.player,False):
+                    powerup.kill()
+                    self.lives += 1
+        if self.tripleshoot:
+            for triple in self.tripleshoot:
+                if pygame.sprite.spritecollide(triple,self.player,False):
+                    triple.kill()
+                    self.player.sprite.triple = True
 
     def display_lives(self):
-        for live in range(self.lives):
-            x = self.live_x_start_pos + (live * (self.live_surf.get_size()[0] + 10))
-            screen.blit(self.live_surf,(x,8))
+        lives = self.font.render(f'{self.lives}',False,'white')
+        lives_rect = lives.get_rect(topright=(self.live_x_start_pos-60, 5))
+        screen.blit(self.live_surf,self.live_surf_rect)
+        screen.blit(lives,lives_rect)
 
     def display_score(self):
         score_surf = self.font.render(f'Score: {self.score}',False,'white')
         score_rect = score_surf.get_rect(topleft = (10,-10))
         screen.blit(score_surf,score_rect)
+
     def alienclear(self):
         if not self.aliens.sprites():
             self.alien_setup(rows = 6, cols = 8)
-
+    def inputs(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_r]:
+            pygame.time.set_timer(ALIENLASER, 0)
+            self.menu = True
     def run(self):  #Game loop
         self.explosion_group.draw(screen)
         self.explosion_group.update()
@@ -204,17 +228,43 @@ class Game:
         self.alien_position_checker()   #Alien positions
         self.extra_alien_timmer()   #Extra alien timer
         self.collision_check()      #Collision check
-        
+        self.powerupsgroup.update()
+        self.tripleshoot.update()
         self.player.sprite.lasers.draw(screen)      #Draws the player lasers
         self.player.draw(screen)    #Draws the player
         self.blocks.draw(screen)     #Draws the obstacles
         self.aliens.draw(screen)      #Draws the aliens
         self.alien_lasers.draw(screen)  #Draws the alien lasers
+        self.powerupsgroup.draw(screen)
+        self.tripleshoot.draw(screen)
         self.extra.draw(screen)
         self.display_lives()        #Displays the lives
         self.display_score()        #Displays the score
         self.alienclear()
+        self.inputs()
 
+class Powerups(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+        self.image = pygame.image.load('./resources/powerups/health.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image,(75, 75)) 
+        self.rect = self.image.get_rect(center = pos) 
+    def update(self):
+        if self.rect.y < screen_height:
+            self.rect.y += 1.2
+        else:
+            self.kill()
+class tripleshoot(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+        self.image = pygame.image.load('./resources/powerups/triple.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image,(75, 75)) 
+        self.rect = self.image.get_rect(center = pos) 
+    def update(self):
+        if self.rect.y < screen_height:
+            self.rect.y += 1.2
+        else:
+            self.kill()
 
 class CRT:  #CRT class
     def __init__(self): #Loads the tv image

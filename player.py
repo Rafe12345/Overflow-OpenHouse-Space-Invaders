@@ -13,10 +13,11 @@ class Player(pygame.sprite.Sprite):
         self.lasers = pygame.sprite.Group()
         self.screen_width = screen_width # Store screen dimensions
         self.screen_height = screen_height 
-
+        self.triple = False
+        self.tripletime = 0
         self.laser_sound = pygame.mixer.Sound('audio/audio_laser.wav')
         self.laser_sound.set_volume(0.5)
-
+        self.count = 0
     def getinput(self): #Where the CV will take over instead of listening to keybinds it listens to the cv output
         # Move left if left hand is raised
         if hand_status["left"]:
@@ -24,7 +25,13 @@ class Player(pygame.sprite.Sprite):
         # Move right if right hand is raised
         if hand_status["right"]:
             self.rect.x += self.speed
-
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_d]: #Movement for the player sprite (RIGHT)
+            if self.rect.x < 720:
+                self.rect.x += self.speed
+        elif keys[pygame.K_a]:  #Movement for the player sprite (LEFT)
+            if self.rect.x > 5:
+                self.rect.x -= self.speed
         # Keep the player within screen bounds
         if self.rect.left < 0:
             self.rect.left = 0
@@ -39,9 +46,23 @@ class Player(pygame.sprite.Sprite):
             self.shootlaser()
             self.laser_sound.play()
             self.lastshottime = self.current_time
-    
+    def triple_shootlaser(self):
+        offsets = [-15, 0, 15]
+        if self.count < 5:
+            if self.current_time - self.tripletime >= 500:
+                for offset in offsets:
+                    laser_position = (self.rect.centerx + offset, self.rect.top)
+                    self.lasers.add(Laser(laser_position, -6, self.rect.bottom, "green"))
+                self.tripletime = self.current_time
+                self.count += 1
+        else:
+            self.count = 0
+            self.triple = False
+
     def update(self):
         self.current_time = pygame.time.get_ticks()
         self.lasers.update()
         self.getinput() # Handle Movement
         self.automatic_shoot() # Calling automatic shooting function
+        if self.triple:
+            self.triple_shootlaser()
