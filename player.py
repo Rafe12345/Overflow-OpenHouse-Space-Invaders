@@ -14,6 +14,9 @@ class Player(pygame.sprite.Sprite):
         self.screen_width = screen_width # Store screen dimensions
         self.screen_height = screen_height 
 
+        self.laser_sound = pygame.mixer.Sound('audio/audio_laser.wav')
+        self.laser_sound.set_volume(0.5)
+
     def getinput(self): #Where the CV will take over instead of listening to keybinds it listens to the cv output
         # Move left if left hand is raised
         if hand_status["left"]:
@@ -34,6 +37,7 @@ class Player(pygame.sprite.Sprite):
     def automatic_shoot(self):  # Automatically shoot laser every 2 seconds
         if self.current_time - self.lastshottime >= self.laserCoolDown:
             self.shootlaser()
+            self.laser_sound.play()
             self.lastshottime = self.current_time
     
     def update(self):
