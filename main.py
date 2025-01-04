@@ -44,14 +44,11 @@ class Game:
         self.extra_spawn_time = randint(40,80) 
         self.powerupsgroup = pygame.sprite.Group()
         self.tripleshoot = pygame.sprite.Group()
-	# Audio
-        music = pygame.mixer.Sound('audio/music.wav')
-        music.set_volume(0.2)
-        music.play(loops = -1)
+	    # Audio
         self.laser_sound = pygame.mixer.Sound('audio/audio_laser.wav')
-        self.laser_sound.set_volume(0.5)
+        self.laser_sound.set_volume(0.6)
         self.explosion_sound = pygame.mixer.Sound('audio/audio_explosion.wav')
-        self.explosion_sound.set_volume(0.5)
+        self.explosion_sound.set_volume(0.6)
 	
 
 
@@ -358,6 +355,10 @@ game = Game()
 crt = CRT()
 menualien = menu()
 ALIENLASER = pygame.USEREVENT + 1 #Sets the timer for the alien laser
+music = pygame.mixer.Sound('audio/music.wav')
+music.set_volume(0.2)
+music.play(loops = -1)
+highestscore = 0
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -365,6 +366,8 @@ while True:
             sys.exit()
         if event.type == ALIENLASER:
             game.alien_shoot()
+    if game.score > highestscore:
+        highestscore = game.score
     if game.menu: #Game Menu
         bg = pygame.image.load('./resources/background.png')
         bg = bg.convert_alpha()
@@ -376,7 +379,7 @@ while True:
         screen.blit(bg, bg_rect)
         screen.blit(logo, logo_rect)
         text = game.font.render('Start' , True , 'black')
-        highscore = game.font.render(f"High Score: {game.score}", True, 'black')
+        highscore = game.font.render(f"High Score: {highestscore}", True, 'black')
         btn = pygame.draw.rect(screen, (171, 54, 214),[ (screen_width - 260) // 2, 550,260,50],border_radius=14)
         highscorebg = pygame.draw.rect(screen, (171, 54, 214),[ (screen_width - 300) // 2, 650,300,50],border_radius=14)
         text_rect = text.get_rect(center=(screen_width // 2, 575))
@@ -387,6 +390,7 @@ while True:
         mouse_pos = pygame.mouse.get_pos()
         if event.type == pygame.MOUSEBUTTONDOWN and btn.collidepoint(mouse_pos):
             pygame.time.set_timer(ALIENLASER,500)
+            del game
             game = Game()
             game.run()
             game.menu = False
