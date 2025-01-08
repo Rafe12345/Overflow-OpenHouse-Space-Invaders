@@ -75,16 +75,16 @@ class Game:
                 else: alien_sprite = Alien('yellow',x,y)                    #Alien colors
                 self.aliens.add(alien_sprite)
 
-
-    def alien_position_checker(self):       #Alien positions
+    def alien_position_checker(self):  # Alien positions
         all_aliens = self.aliens.sprites()
         for alien in all_aliens:
             if alien.rect.right >= screen_width:
-                self.alien_direction = -0.8
-                self.alien_move_down(2)
+                self.alien_direction = -abs(self.alien_direction)  # Maintain the current speed, reverse direction
+                self.alien_move_down(2)  # Move aliens down
             elif alien.rect.left <= 0:
-                self.alien_direction = 0.8
-                self.alien_move_down(2)
+                self.alien_direction = abs(self.alien_direction)  # Maintain the current speed, reverse direction
+                self.alien_move_down(2)  # Move aliens down
+
 
 
     def alien_move_down(self,distance):
@@ -205,6 +205,7 @@ class Game:
 
     def alienclear(self):
         if not self.aliens.sprites():
+            self.alien_direction += 3
             self.alien_setup(rows = 6, cols = 8)
     def inputs(self):
         keys = pygame.key.get_pressed()
