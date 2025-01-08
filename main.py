@@ -8,7 +8,7 @@ from hand_detection import hand_status # Ensures hand detetion runs in the backg
 
 
 class Game:
-    def __init__(self):
+    def __init__(self): #Set up for all the game variables
         #player setup
         player_sprite = Player((screen_width/2,screen_height-20), screen_width, screen_height)
         self.player = pygame.sprite.GroupSingle(player_sprite)
@@ -53,7 +53,7 @@ class Game:
 
 
     def create_obstacle(self, x_start, y_start,offset_x):
-        for row_index, row in enumerate(self.shape):
+        for row_index, row in enumerate(self.shape): #Loops through a list of string which defines the shape of the obstacle represented by X which gives the index offset position.
             for column_index, column in enumerate(row):
                 if column == 'x':
                     x = x_start + column_index * self.block_size + offset_x
@@ -241,7 +241,7 @@ class Game:
         self.alienclear()
         self.inputs()
 
-class Powerups(pygame.sprite.Sprite):
+class Powerups(pygame.sprite.Sprite): #Health powerup
     def __init__(self, pos):
         super().__init__()
         self.image = pygame.image.load('./resources/powerups/health.png').convert_alpha()
@@ -252,7 +252,7 @@ class Powerups(pygame.sprite.Sprite):
             self.rect.y += 1.2
         else:
             self.kill()
-class tripleshoot(pygame.sprite.Sprite):
+class tripleshoot(pygame.sprite.Sprite): #Triple shoot powerup
     def __init__(self, pos):
         super().__init__()
         self.image = pygame.image.load('./resources/powerups/triple.png').convert_alpha()
@@ -264,7 +264,7 @@ class tripleshoot(pygame.sprite.Sprite):
         else:
             self.kill()
 
-class CRT:  #CRT class
+class CRT:  #CRT class (Helps to achieve the retro tv effect aka the lines you see flicker on old tvs)
     def __init__(self): #Loads the tv image
         self.tv = pygame.image.load('resources/tv.png').convert_alpha()
         self.tv = pygame.transform.scale(self.tv,(screen_width,screen_height))
@@ -285,7 +285,7 @@ class Explosion(pygame.sprite.Sprite): #Explosion code from Russcode
 	def __init__(self, x, y):
 		pygame.sprite.Sprite.__init__(self)
 		self.images = []
-		for num in range(1, 6):
+		for num in range(1, 6): 
 			img = pygame.image.load(f"./resources/explosion/exp{num}.png")
 			img = pygame.transform.scale(img, (100, 100))
 			self.images.append(img)
@@ -295,7 +295,7 @@ class Explosion(pygame.sprite.Sprite): #Explosion code from Russcode
 		self.rect.center = [x, y]
 		self.counter = 0
 
-	def update(self):
+	def update(self): #Loops through 5 images which plays the animation effect
 		explosion_speed = 4
 		#update explosion animation
 		self.counter += 1
@@ -396,7 +396,7 @@ while True:
             game.run()
             game.menu = False
     else:
-        if not game.paused:
+        if not game.paused: #Variable to skip redrawing of screen for stunned effect when hit by laser
             screen.blit(bg, bg_rect)
             crt.draw()
         game.player.sprite.update()
